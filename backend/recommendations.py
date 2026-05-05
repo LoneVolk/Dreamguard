@@ -4,134 +4,139 @@ from models import SleepRecord, SleepAnomaly, Recommendation, UserContext
 
 
 # ─────────────────────────────────────────
-#  БАЗА РЕКОМЕНДАЦИЙ
+#  ШАБЛОНЫ РЕКОМЕНДАЦИЙ (dict, не объекты!)
+#  Это исключает риск мутации общих синглтонов.
 # ─────────────────────────────────────────
 
-RECOMMENDATIONS_DB = {
+RECOMMENDATIONS_TEMPLATES = {
 
-    "short_sleep": Recommendation(
-        date=date.today(),
-        category="schedule",
-        title="Увеличьте продолжительность сна",
-        text=(
+    "short_sleep": {
+        "category": "schedule",
+        "title": "Увеличьте продолжительность сна",
+        "text": (
             "Вы регулярно спите меньше рекомендованной нормы. "
             "Попробуйте ложиться на 30-60 минут раньше в течение недели — "
             "резкое изменение режима хуже, чем постепенное. "
             "Установите напоминание о подготовке ко сну за час до нужного времени."
         ),
-        based_on="Недостаточная продолжительность сна",
-        priority=1
-    ),
+        "based_on": "Недостаточная продолжительность сна",
+        "priority": 1,
+    },
 
-    "low_deep_sleep": Recommendation(
-        date=date.today(),
-        category="lifestyle",
-        title="Улучшите качество глубокого сна",
-        text=(
+    "low_deep_sleep": {
+        "category": "lifestyle",
+        "title": "Улучшите качество глубокого сна",
+        "text": (
             "Глубокий сон — фаза физического восстановления организма. "
             "Для его улучшения: избегайте алкоголя (он подавляет Deep сон), "
             "поддерживайте прохладу в спальне (18-20°C), "
             "и избегайте интенсивных тренировок за 3 часа до сна."
         ),
-        based_on="Недостаток глубокого сна",
-        priority=1
-    ),
+        "based_on": "Недостаток глубокого сна",
+        "priority": 1,
+    },
 
-    "low_rem_sleep": Recommendation(
-        date=date.today(),
-        category="lifestyle",
-        title="Улучшите REM сон",
-        text=(
+    "low_rem_sleep": {
+        "category": "lifestyle",
+        "title": "Улучшите REM сон",
+        "text": (
             "REM сон важен для памяти и эмоционального восстановления. "
             "Он преобладает в последних циклах ночи, поэтому главное — "
             "не сокращать сон утром. Также REM подавляют некоторые лекарства "
             "и алкоголь — проконсультируйтесь с врачом если принимаете препараты."
         ),
-        based_on="Недостаток REM сна",
-        priority=2
-    ),
+        "based_on": "Недостаток REM сна",
+        "priority": 2,
+    },
 
-    "frequent_awakenings": Recommendation(
-        date=date.today(),
-        category="environment",
-        title="Устраните причины ночных пробуждений",
-        text=(
+    "frequent_awakenings": {
+        "category": "environment",
+        "title": "Устраните причины ночных пробуждений",
+        "text": (
             "Частые пробуждения фрагментируют сон и снижают его восстановительный эффект. "
             "Проверьте: шум (беруши или белый шум), свет (плотные шторы), "
             "температуру (оптимально 18-20°C) и потребление жидкости вечером. "
             "Если проблема сохраняется — возможно апноэ сна, стоит обратиться к врачу."
         ),
-        based_on="Частые пробуждения",
-        priority=1
-    ),
+        "based_on": "Частые пробуждения",
+        "priority": 1,
+    },
 
-    "high_heart_rate": Recommendation(
-        date=date.today(),
-        category="lifestyle",
-        title="Снизьте ночной пульс",
-        text=(
+    "high_heart_rate": {
+        "category": "lifestyle",
+        "title": "Снизьте ночной пульс",
+        "text": (
             "Повышенный пульс ночью может указывать на стресс, перетренированность или начало болезни. "
             "Попробуйте вечернюю медитацию или дыхательные упражнения (4-7-8: вдох 4с, задержка 7с, выдох 8с). "
             "Если высокий пульс сохраняется несколько ночей — обратитесь к врачу."
         ),
-        based_on="Повышенный ночной пульс",
-        priority=1
-    ),
+        "based_on": "Повышенный ночной пульс",
+        "priority": 1,
+    },
 
-    "low_spo2": Recommendation(
-        date=date.today(),
-        category="health",
-        title="Обратитесь к врачу — возможное апноэ",
-        text=(
+    "low_spo2": {
+        "category": "health",
+        "title": "Обратитесь к врачу — возможное апноэ",
+        "text": (
             "Снижение уровня кислорода во сне (SpO2 < 90%) — серьёзный симптом, "
             "который может указывать на синдром обструктивного апноэ сна. "
             "Это состояние требует медицинской диагностики (полисомнография). "
             "Рекомендуем обратиться к врачу-сомнологу."
         ),
-        based_on="Снижение SpO2",
-        priority=1
-    ),
+        "based_on": "Снижение SpO2",
+        "priority": 1,
+    },
 
-    "social_jetlag": Recommendation(
-        date=date.today(),
-        category="schedule",
-        title="Выровняйте режим будни/выходные",
-        text=(
+    "social_jetlag": {
+        "category": "schedule",
+        "title": "Выровняйте режим будни/выходные",
+        "text": (
             "Большая разница времени сна в будни и выходные — 'социальный джетлаг' — "
             "нарушает циркадные ритмы так же, как перелёт через часовые пояса. "
             "Постарайтесь сократить разницу до 1 часа: в выходные вставайте "
             "не позже чем на час позже обычного."
         ),
-        based_on="Социальный джетлаг",
-        priority=2
-    ),
+        "based_on": "Социальный джетлаг",
+        "priority": 2,
+    },
 
-    "irregular_schedule": Recommendation(
-        date=date.today(),
-        category="schedule",
-        title="Стабилизируйте время отхода ко сну",
-        text=(
+    "irregular_schedule": {
+        "category": "schedule",
+        "title": "Стабилизируйте время отхода ко сну",
+        "text": (
             "Нестабильный режим сна мешает организму настроить биологические часы. "
             "Выберите комфортное время сна и придерживайтесь его ±30 минут каждый день, "
             "включая выходные. Даже одна 'неправильная' ночь сдвигает ритм на 1-2 дня."
         ),
-        based_on="Нестабильный режим сна",
-        priority=2
-    ),
+        "based_on": "Нестабильный режим сна",
+        "priority": 2,
+    },
 
-    "chronic_sleep_deprivation": Recommendation(
-        date=date.today(),
-        category="schedule",
-        title="Восстановите долг сна",
-        text=(
+    "chronic_sleep_deprivation": {
+        "category": "schedule",
+        "title": "Восстановите долг сна",
+        "text": (
             "Несколько ночей подряд с недостаточным сном создают накопленный долг сна. "
             "Он не восполняется одной долгой ночью — нужно 2-3 дня полноценного сна. "
             "Если это рабочая нагрузка — рассмотрите короткий дневной сон (20 мин до 15:00)."
         ),
-        based_on="Хронический недосып",
-        priority=1
-    ),
+        "based_on": "Хронический недосып",
+        "priority": 1,
+    },
 }
+
+
+def _make_recommendation(template: dict, user_id: str, today: date) -> Recommendation:
+    """Создаёт свежий объект Recommendation из шаблона. Без мутаций."""
+    return Recommendation(
+        date=today,
+        user_id=user_id,
+        category=template["category"],
+        title=template["title"],
+        text=template["text"],
+        based_on=template["based_on"],
+        priority=template["priority"],
+    )
 
 
 # ─────────────────────────────────────────
@@ -148,11 +153,11 @@ def get_context_recommendations(
     и качеством сна. Возвращает персональные рекомендации.
     """
     recommendations = []
+    today = date.today()
 
     if len(context_records) < 5 or len(sleep_records) < 5:
         return recommendations
 
-    # Собираем данные для корреляций
     caffeine_nights = []
     no_caffeine_nights = []
     alcohol_nights = []
@@ -162,7 +167,6 @@ def get_context_recommendations(
     active_nights = []
     inactive_nights = []
 
-    # Создаём словарь записей сна по дате
     sleep_by_date = {str(r.date): r for r in sleep_records}
 
     for ctx in context_records:
@@ -201,7 +205,7 @@ def get_context_recommendations(
 
         if diff > 8:
             recommendations.append(Recommendation(
-                date=date.today(),
+                date=today,
                 category="lifestyle",
                 title="Кофеин ухудшает ваш сон",
                 text=(
@@ -221,7 +225,7 @@ def get_context_recommendations(
 
         if diff > 8:
             recommendations.append(Recommendation(
-                date=date.today(),
+                date=today,
                 category="lifestyle",
                 title="Алкоголь снижает качество вашего сна",
                 text=(
@@ -241,7 +245,7 @@ def get_context_recommendations(
 
         if diff > 10:
             recommendations.append(Recommendation(
-                date=date.today(),
+                date=today,
                 category="lifestyle",
                 title="Стресс заметно влияет на ваш сон",
                 text=(
@@ -261,7 +265,7 @@ def get_context_recommendations(
 
         if diff > 5:
             recommendations.append(Recommendation(
-                date=date.today(),
+                date=today,
                 category="lifestyle",
                 title="Физическая активность улучшает ваш сон",
                 text=(
@@ -292,19 +296,17 @@ def generate_recommendations(
     """
     recommendations = []
     seen_types = set()
-
     today = date.today()
 
-    # Рекомендации по аномалиям (без дублей)
+    # Рекомендации по аномалиям (без дублей, всегда свежие объекты)
     for anomaly in anomalies:
         atype = anomaly.anomaly_type
         if atype in seen_types:
             continue
 
-        if atype in RECOMMENDATIONS_DB:
-            rec = RECOMMENDATIONS_DB[atype].copy()
-            rec.date = today
-            rec.user_id = anomaly.user_id
+        template = RECOMMENDATIONS_TEMPLATES.get(atype)
+        if template:
+            rec = _make_recommendation(template, anomaly.user_id, today)
             recommendations.append(rec)
             seen_types.add(atype)
 

@@ -1,1 +1,3 @@
-# connectors/__init__.py
+from .simulator import SimulatorConnector
+
+__all__ = ["SimulatorConnector"]
